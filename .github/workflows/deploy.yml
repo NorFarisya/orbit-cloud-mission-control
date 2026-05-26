@@ -7,19 +7,15 @@ on:
       - dev
 
 jobs:
-  backend-ci:
+  build-and-deploy:
     runs-on: ubuntu-latest
-
-    defaults:
-      run:
-        working-directory: backend
 
     steps:
       # 1. Checkout repo
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      # 2. Setup Node
+      # 2. Setup Node.js
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
@@ -29,18 +25,22 @@ jobs:
       - name: Install Dependencies
         run: npm install
 
-      # 4. Lint (safe fallback)
-      - name: Run Lint
-        run: npm run lint || true
+      # 4. Build Vite frontend (creates dist/)
+      - name: Build Frontend
+        run: npm run build
 
-      # 5. Test (safe fallback)
-      - name: Run Tests
-        run: npm test || true
+      # 5. Configure AWS credentials
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ap-southeast-1
 
-      # 6. Fake Build Step (backend)
-      - name: Backend Build Step
-        run: echo "Backend ready (no build required)"
+      # 6. Deploy to S3
+      - name: Deploy to S3
+        run: aws s3 sync dist/ s3://orbit-cloud-mission-control-ui --delete
 
-      # 7. Success
-      - name: CI Success
-        run: echo "🚀 Backend CI pipeline completed successfully!"
+      # 7. Success message
+      - name: Deployment Success
+        run: echo "🚀 Frontend deployed successfully to S3!"
