@@ -15,21 +15,25 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      # 2. Setup Node.js
+      # 2. Setup Node
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 20
 
-      # 3. Install dependencies
+      # 3. Install dependencies (frontend root)
       - name: Install Dependencies
         run: npm install
 
-      # 4. Build Vite frontend (creates dist/)
+      # 4. Build Vite frontend
       - name: Build Frontend
         run: npm run build
 
-      # 5. Configure AWS credentials
+      # 5. Verify build exists (IMPORTANT DEBUG STEP)
+      - name: Check dist folder
+        run: ls dist
+
+      # 6. AWS credentials
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -37,10 +41,10 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ap-southeast-1
 
-      # 6. Deploy to S3
+      # 7. Deploy to S3
       - name: Deploy to S3
-        run: aws s3 sync dist/ s3://orbit-cloud-mission-control-ui --delete
+        run: aws s3 sync ./dist s3://orbit-cloud-mission-control-ui --delete
 
-      # 7. Success message
-      - name: Deployment Success
-        run: echo "🚀 Frontend deployed successfully to S3!"
+      # 8. Confirm
+      - name: Success
+        run: echo "Frontend deployed successfully 🚀"
