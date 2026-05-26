@@ -1,125 +1,118 @@
-// src/services/api.js - Works for both local and S3 deployment
+// ================= BACKEND CONFIG =================
+// LOCAL (for dev)
+const LOCAL_BACKEND_URL = "http://localhost:5000";
 
-// ============ API CONFIGURATION ============
-// Change this to your EC2 public IP when deployed
-// For now, keep localhost for testing
-const BACKEND_URL = "http://localhost:5000"; // Change to your EC2 IP when ready
-// Example: const BACKEND_URL = "http://13.215.123.456:5000";
+// PRODUCTION (Render backend)
+const PROD_BACKEND_URL = "https://orbit-backend-i536.onrender.com";
 
+// 👉 Automatically choose based on where frontend is running
+const BACKEND_URL =
+  window.location.hostname === "localhost"
+    ? LOCAL_BACKEND_URL
+    : PROD_BACKEND_URL;
+
+// ================= SAFE FETCH WRAPPER =================
+async function safeFetch(url, fallback) {
+  try {
+    const res = await fetch(url);
+
+    if (!res.ok) {
+      throw new Error(`HTTP ${res.status}`);
+    }
+
+    return await res.json();
+  } catch (err) {
+    console.error(`API Error: ${url}`, err.message);
+    return fallback;
+  }
+}
+
+// ================= STATUS =================
 export async function getStatus() {
-  try {
-    const response = await fetch(`${BACKEND_URL}/status`);
-    if (!response.ok) throw new Error(`HTTP ${response.status}`);
-    return await response.json();
-  } catch (error) {
-    console.error("Error fetching status:", error);
-    return {
-      system: "Orbit Cloud Mission Control",
-      status: "Operational",
-      deployments: 0,
-      cloudHealth: "98%",
-      pipeline: "Active",
-      timestamp: new Date().toISOString()
-    };
-  }
+  return safeFetch(`${BACKEND_URL}/status`, {
+    system: "Orbit Cloud Mission Control",
+    status: "Offline (backend not reachable)",
+    deployments: 0,
+    cloudHealth: "N/A",
+    pipeline: "Unknown",
+    timestamp: new Date().toISOString()
+  });
 }
 
+// ================= DEPLOYMENTS =================
 export async function getDeployments() {
-  try {
-    const response = await fetch(`${BACKEND_URL}/deployments`);
-    if (!response.ok) throw new Error(`HTTP ${response.status}`);
-    return await response.json();
-  } catch (error) {
-    console.error("Error fetching deployments:", error);
-    return [];
-  }
+  return safeFetch(`${BACKEND_URL}/deployments`, [
+    {
+      id: "mock_1",
+      status: "⚠️ Backend Offline",
+      time: new Date().toISOString(),
+      version: "v0.0.0"
+    }
+  ]);
 }
 
+// ================= LOGS =================
 export async function getLogs() {
-  try {
-    const response = await fetch(`${BACKEND_URL}/logs`);
-    if (!response.ok) throw new Error(`HTTP ${response.status}`);
-    return await response.json();
-  } catch (error) {
-    console.error("Error fetching logs:", error);
-    return [];
-  }
+  return safeFetch(`${BACKEND_URL}/logs`, []);
 }
 
+// ================= PIPELINE =================
 export async function getPipeline() {
-  try {
-    const response = await fetch(`${BACKEND_URL}/pipeline`);
-    if (!response.ok) throw new Error(`HTTP ${response.status}`);
-    return await response.json();
-  } catch (error) {
-    console.error("Error fetching pipeline:", error);
-    return [];
-  }
+  return safeFetch(`${BACKEND_URL}/pipeline`, []);
 }
 
+// ================= CPU =================
 export async function getCpuMonitoring() {
-  try {
-    const response = await fetch(`${BACKEND_URL}/monitoring/cpu`);
-    if (!response.ok) throw new Error(`HTTP ${response.status}`);
-    return await response.json();
-  } catch (error) {
-    console.error("Error fetching CPU data:", error);
-    return { data: [], lastUpdated: new Date().toISOString() };
-  }
+  return safeFetch(`${BACKEND_URL}/monitoring/cpu`, {
+    data: [],
+    lastUpdated: new Date().toISOString()
+  });
 }
 
+// ================= MEMORY =================
 export async function getMemoryMonitoring() {
-  try {
-    const response = await fetch(`${BACKEND_URL}/monitoring/memory`);
-    if (!response.ok) throw new Error(`HTTP ${response.status}`);
-    return await response.json();
-  } catch (error) {
-    console.error("Error fetching Memory data:", error);
-    return { data: [], lastUpdated: new Date().toISOString() };
-  }
+  return safeFetch(`${BACKEND_URL}/monitoring/memory`, {
+    data: [],
+    lastUpdated: new Date().toISOString()
+  });
 }
 
+// ================= SECURITY =================
 export async function getSecurity() {
-  try {
-    const response = await fetch(`${BACKEND_URL}/security`);
-    if (!response.ok) throw new Error(`HTTP ${response.status}`);
-    return await response.json();
-  } catch (error) {
-    console.error("Error fetching security:", error);
-    return {
-      threatDetection: "Secure",
-      activeSessions: 12,
-      firewallStatus: "Active",
-      source: "Cache",
-      region: "ap-southeast-1"
-    };
-  }
+  return safeFetch(`${BACKEND_URL}/security`, {
+    threatDetection: "Unknown",
+    activeSessions: 0,
+    firewallStatus: "Unknown",
+    source: "offline",
+    region: "N/A"
+  });
 }
 
+// ================= UPDATE SECURITY =================
 export async function updateSecurity(type, value) {
   try {
-    const response = await fetch(`${BACKEND_URL}/security/update`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+    const res = await fetch(`${BACKEND_URL}/security/update`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ type, value })
     });
-    return await response.json();
-  } catch (error) {
-    console.error("Error updating security:", error);
-    return { success: false, error: error.message };
+
+    return await res.json();
+  } catch (err) {
+    return { success: false, error: err.message };
   }
 }
 
+// ================= DEPLOY TRIGGER =================
 export async function triggerDeploy() {
   try {
-    const response = await fetch(`${BACKEND_URL}/deploy`, {
+    const res = await fetch(`${BACKEND_URL}/deploy`, {
       method: "POST",
-      headers: { 'Content-Type': 'application/json' }
+      headers: { "Content-Type": "application/json" }
     });
-    if (!response.ok) throw new Error(`HTTP ${response.status}`);
-    return await response.json();
-  } catch (error) {
-    console.error("Error triggering deploy:", error);
-    return { success: false, error: error.message };
+
+    return await res.json();
+  } catch (err) {
+    return { success: false, error: err.message };
   }
 }
