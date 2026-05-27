@@ -41,7 +41,7 @@ function Dashboard() {
     <div className="space-y-6">
       {/* Header */}
       <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold">Orbit Mission Control</h1>
+        <h1 className="text-3xl font-bold">Orbit Mission Control TEST</h1>
         <div className="text-right">
           <div className="text-xs text-green-400">● System Operational</div>
           <div className="text-xs text-gray-500">

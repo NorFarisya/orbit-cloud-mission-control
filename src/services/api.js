@@ -5,7 +5,7 @@ const LOCAL_BACKEND_URL = "http://localhost:5000";
 // PRODUCTION (Render backend)
 const PROD_BACKEND_URL = "https://orbit-backend-i536.onrender.com";
 
-// 👉 Automatically choose based on where frontend is running
+// Automatically choose based on where frontend is running
 const BACKEND_URL =
   window.location.hostname === "localhost"
     ? LOCAL_BACKEND_URL
