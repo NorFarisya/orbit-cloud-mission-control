@@ -43,7 +43,7 @@ jobs:
 
       # 7. Deploy to S3
       - name: Deploy to S3
-        run: aws s3 sync ./dist s3://orbit-cloud-mission-control-ui --delete
+        run: aws s3 sync ./dist s3://orbit-cloud-mission-control --delete
 
       # 8. Confirm
       - name: Success
