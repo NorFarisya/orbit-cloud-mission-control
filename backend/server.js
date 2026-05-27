@@ -189,10 +189,53 @@ function updatePipelineProgress() {
 
 setInterval(updatePipelineProgress, 5000);
 
-app.get('/pipeline', (req, res) => {
-  res.json(pipelineStages);
-});
+app.get('/pipeline', async (req, res) => {
+  const { Octokit } = require("@octokit/rest");
 
+  const octokit = new Octokit({
+    auth: process.env.GITHUB_TOKEN
+  });
+
+  const [owner, repo] = process.env.GITHUB_REPO.split("/");
+
+  try {
+    const response = await octokit.actions.listWorkflowRunsForRepo({
+      owner,
+      repo,
+      per_page: 10,
+    });
+
+    const runs = response.data.workflow_runs.map(run => ({
+      id: run.id,
+      name: run.name,
+      status:
+        run.status === "completed"
+          ? (run.conclusion === "success" ? "completed" : "failed")
+          : "in_progress",
+      branch: run.head_branch,
+      commit: run.display_title,
+      created_at: run.created_at,
+      updated_at: run.updated_at,
+      duration: run.run_started_at
+        ? `${Math.round(
+            (new Date(run.updated_at) - new Date(run.run_started_at)) / 1000
+          )}s`
+        : "N/A"
+    }));
+
+    res.json({
+      source: "github-actions",
+      runs
+    });
+
+  } catch (err) {
+    res.json({
+      source: "error",
+      runs: [],
+      error: err.message
+    });
+  }
+});
 const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {
