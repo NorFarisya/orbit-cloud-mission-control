@@ -11,29 +11,29 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 1. Checkout repo
+      # 1.Checkout repo
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      # 2. Setup Node
+      # 2.Setup Node
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 20
 
-      # 3. Install dependencies (frontend root)
+      # 3.Install dependencies (for frontend root)
       - name: Install Dependencies
         run: npm install
 
-      # 4. Build Vite frontend
+      # 4.Build Vite frontend
       - name: Build Frontend
         run: npm run build
 
-      # 5. Verify build exists (IMPORTANT DEBUG STEP)
+      # 5.Verify build exists 
       - name: Check dist folder
         run: ls dist
 
-      # 6. AWS credentials
+      # 6.AWS Credentials
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -42,10 +42,10 @@ jobs:
           aws-region: ap-southeast-1
 
 
-      # 7. Deploy to S3
+      # 7.Deploy to S3
       - name: Deploy to S3
         run: aws s3 sync ./dist s3://orbit-mission-control --delete
 
-      # 8. Confirm
+      # 8.Confirm
       - name: Success
         run: echo "Frontend deployed successfully 🚀"
