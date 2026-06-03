@@ -193,3 +193,5 @@ This project was developed collaboratively.
 This project was successfully completed, demonstrating a full DevOps lifecycle implementation including CI/CD, cloud infrastructure integration, and real-time monitoring.
 
 It fulfils the requirements for build, test, and deployment pipelines, as well as showcasing the practical application of cloud computing and DevOps principles in a real-world architecture.
+
+TEST PRESENTATION DEMO
