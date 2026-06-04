@@ -5,7 +5,7 @@ function Sidebar() {
     <aside className="w-64 min-h-screen border-r border-white/10 bg-slate-950/60 backdrop-blur-xl p-6">
 
       <h1 className="text-4xl font-bold mb-10 text-white">
-        🚀 ORBIT
+        ORBIT
       </h1>
 
       <nav className="flex flex-col gap-4">
